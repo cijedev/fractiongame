@@ -1,0 +1,233 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Fraction Quest — with Arya & Ciara</title>
+<style>
+html{background:#1e1b4b}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;font-family:system-ui,"Segoe UI",Roboto,sans-serif;background:linear-gradient(160deg,#1e1b4b,#4c1d95 60%,#0f766e) fixed;color:#fff;min-height:100vh;overflow-x:hidden;user-select:none}
+.scr{display:none;max-width:920px;margin:auto;padding:14px 16px 90px;text-align:center}.scr.on{display:block}
+h1{font-size:2.3em;margin:.2em 0;text-shadow:0 3px 0 #0006}h2{margin:.3em 0}
+button{font:inherit;cursor:pointer;border:0;border-radius:14px;padding:11px 16px;margin:5px;background:#fbbf24;color:#1e1b4b;font-weight:700;box-shadow:0 4px 0 #b45309;transition:transform .1s}
+button:hover:not(:disabled){transform:translateY(-2px)}button:disabled{opacity:.4;cursor:default}
+.ghost{background:#ffffff26;color:#fff;box-shadow:none}
+#mute{position:fixed;top:8px;right:8px;z-index:20;padding:8px 11px}
+.card{background:#ffffff18;border-radius:20px;padding:14px;margin:8px;display:inline-block;vertical-align:top}
+.chars{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.chars .card{width:190px;margin:4px;cursor:pointer;border:3px solid transparent}.chars .card.sel{border-color:#fbbf24;background:#ffffff2a}
+.worlds{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px}.world{padding:12px;border-radius:18px;background:#ffffff22}.world.lock{opacity:.4}
+.lv{width:50px;height:58px;padding:2px;border-radius:14px;font-size:1em;line-height:1.1}.lv small{display:block;font-size:.6em;letter-spacing:-1px}
+.guide{display:flex;align-items:center;gap:10px;background:#ffffff18;border-radius:20px;padding:6px 12px;text-align:left;margin:8px 0;min-height:84px}
+.bubble{background:#fff;color:#1e1b4b;border-radius:16px;padding:10px 14px;flex:1;font-weight:600}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}.bar{flex:1;height:12px;background:#ffffff33;border-radius:8px;overflow:hidden}.bar i{display:block;height:100%;background:#fbbf24;transition:width .3s}
+.prompt{font-size:1.25em;margin:8px 0}.viz{min-height:20px;transition:opacity .4s}
+.eq{font-size:2em;display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:6px;margin:12px 0;transition:opacity .4s}
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.05;margin:0 3px}.frac>span:first-child{border-bottom:3px solid currentColor;padding:0 4px 2px}.frac>span:last-child{padding-top:2px}
+.blank{display:inline-flex;min-width:58px;height:52px;border:3px dashed #fbbf24;border-radius:12px;align-items:center;justify-content:center;background:#00000022;margin:2px;font-size:.85em;cursor:pointer}
+.blank.hot{background:#fbbf2455}.blank.filled{border-style:solid;background:#e0e7ff;color:#1e1b4b}.blank.bad{border-color:#f87171;animation:shake .4s}
+.tray{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;min-height:64px;padding:8px;background:#00000025;border-radius:16px;margin:8px 0}
+.tile{min-width:56px;height:52px;padding:0 10px;border-radius:12px;background:#e0e7ff;color:#1e1b4b;font-size:1.5em;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 0 #6366f1;cursor:grab;touch-action:none}
+.tile.sel{outline:4px solid #fbbf24}.tile.used{visibility:hidden}.tile.drag{position:fixed;z-index:50;pointer-events:none;transform:scale(1.15)}.tile.pulse{animation:pulse .6s 4}
+.slice{background:#fbbf24;box-shadow:0 4px 0 #b45309;font-size:1.2em}
+@keyframes pulse{50%{transform:scale(1.25);background:#fde047}}
+.pu button{background:#a78bfa;box-shadow:0 4px 0 #5b21b6;color:#fff;font-size:.9em}
+.dance{animation:dance .45s infinite alternate}@keyframes dance{from{transform:rotate(-10deg)}to{transform:rotate(10deg) translateY(-16px)}}
+.bob{animation:bob 2s infinite ease-in-out}@keyframes bob{50%{transform:translateY(-5px)}}
+.shake{animation:shake .4s}@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.stars{font-size:2.6em;letter-spacing:6px}.stars span{display:inline-block;animation:pop .5s backwards}.stars span:nth-child(2){animation-delay:.25s}.stars span:nth-child(3){animation-delay:.5s}@keyframes pop{from{transform:scale(0) rotate(-90deg)}}
+.coll{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px}.slot{background:#ffffff18;border-radius:12px;padding:8px;font-size:2em}.slot small{display:block;font-size:.33em}.slot.no{filter:grayscale(1);opacity:.28}
+#conf{position:fixed;inset:0;pointer-events:none;z-index:60}
+.toast{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);font-size:3em;z-index:55;animation:toast 1s forwards;pointer-events:none;text-shadow:0 4px 0 #0007}@keyframes toast{from{opacity:0;transform:translate(-50%,-30%) scale(.5)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}to{opacity:0;transform:translate(-50%,-90%)}}
+</style></head><body>
+<canvas id="conf"></canvas><button id="mute" class="ghost" onclick="toggleMute()">🔊</button>
+
+<div id="s-title" class="scr on"><h1>🍕 Fraction Quest</h1><p>Choose your hero! Your hero leads World 1, then the whole crew takes turns guiding.</p>
+<div class="chars"><div class="card" data-c="arya" onclick="pick('arya')"><div id="ta"></div><h2>Arya</h2><p>Bubbly star-wizard. Loves sparkles, shouting “Woohoo!”, and zapping problems with her wand.</p></div>
+<div class="card" data-c="ciara" onclick="pick('ciara')"><div id="ts"></div><h2>Ciara</h2><p>Calm, clever explorer with a lantern and big curious eyes. Maps every problem one careful step at a time.</p></div>
+<div class="card" data-c="jeremy" onclick="pick('jeremy')"><div id="tj"></div><h2>Jeremy</h2><p>High-energy skater with a bright red mohawk. Turns every puzzle into a trick to land. 🤘</p></div>
+<div class="card" data-c="natalie" onclick="pick('natalie')"><div id="tn"></div><h2>Natalie</h2><p>Cheerful bookworm who never goes anywhere without a book under her arm. Full of fun facts.</p></div></div>
+<p><button onclick="go('map')">Start Adventure ▶</button><button onclick="go('coll')">💎 Collection</button></p>
+<p><a href="/students/games/" style="color:#fde68a;font-weight:700">🏠 All games</a></p>
+<p><small>Drag the tiles into the boxes (or tap a tile, then tap a box).</small></p></div>
+
+<div id="s-map" class="scr"><h1>World Map</h1><div class="guide"><div id="mg"></div><div class="bubble" id="mb"></div></div>
+<div class="worlds" id="worlds"></div><p>⭐ Stars: <b id="starTot"></b> &nbsp; 🪙 Power tokens: <b id="tok"></b></p>
+<button class="ghost" onclick="go('title')">⬅ Heroes</button><button onclick="go('coll')">💎 Collection</button><button class="ghost" onclick="if(confirm('Erase all progress?')){localStorage.removeItem('fq2');location.reload()}">Reset</button></div>
+
+<div id="s-play" class="scr"><div class="top"><button class="ghost" onclick="go('map')">✖</button><b id="lvname"></b><div class="bar"><i id="prog"></i></div></div>
+<div class="guide"><div id="pg"></div><div class="bubble" id="pb"></div></div>
+<div class="prompt" id="promptEl"></div><div class="viz" id="viz"></div><div class="eq" id="eq"></div>
+<div class="tray" id="tray"></div>
+<div><button id="checkBtn" onclick="check()">✔ Check</button></div>
+<div class="pu" id="pu"></div></div>
+
+<div id="s-win" class="scr"><h1 id="wt"></h1><div class="stars" id="wstars"></div><div class="chars" id="dancers"></div><p id="wmsg" style="font-size:1.2em"></p>
+<button class="ghost" onclick="go('map')">Map</button><button id="retryBtn" class="ghost">↻ Replay</button><button id="nextBtn">Next ▶</button></div>
+
+<div id="s-coll" class="scr"><h1>💎 Collection</h1><h3>Gems — one per level</h3><div class="coll" id="gems"></div><h3>Stickers — finish worlds & earn perfect runs</h3><div class="coll" id="stk"></div>
+<p><button onclick="go('map')">Map</button><button class="ghost" onclick="go('title')">Title</button></p></div>
+
+<script>
+// ===== Characters =====
+const CHARS=['arya','ciara','jeremy','natalie'];
+function svg(c,s=110){const N={arya:'Arya',ciara:'Ciara',jeremy:'Jeremy',natalie:'Natalie'}[c]||'Guide',u=c+Math.random().toString(36).slice(2,7);
+const mouth=(o=0)=>`<path d="M42 ${56+o} Q50 ${64+o} 58 ${56+o}" stroke="#7f1d1d" stroke-width="2.5" fill="${o?'#fff':'none'}" stroke-linecap="round"/>`;
+const cheeks=(op=.45)=>`<ellipse cx="35" cy="53" rx="5" ry="3.2" fill="#fb7185" opacity="${op}"/><ellipse cx="65" cy="53" rx="5" ry="3.2" fill="#fb7185" opacity="${op}"/>`;
+const eyes=`<circle cx="41" cy="45" r="3.5" fill="#1e1b4b"/><circle cx="59" cy="45" r="3.5" fill="#1e1b4b"/><circle cx="42.2" cy="43.8" r="1.2" fill="#fff"/><circle cx="60.2" cy="43.8" r="1.2" fill="#fff"/>`;
+let body='';
+if(c==='arya'){const h='#a21caf';body=`<defs><linearGradient id="h${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e879f9"/><stop offset="1" stop-color="${h}"/></linearGradient><linearGradient id="d${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f9a8d4"/><stop offset="1" stop-color="#c084fc"/></linearGradient></defs>
+<path d="M22 50 Q14 80 20 100 Q26 92 30 100 Q34 80 30 60Z M78 50 Q86 80 80 100 Q74 92 70 100 Q66 80 70 60Z" fill="url(#h${u})"/>
+<path d="M36 70 L64 70 L78 112 Q50 118 22 112Z" fill="url(#d${u})"/><path d="M40 70 Q50 78 60 70" stroke="#fff" stroke-width="2" fill="none"/>
+<circle cx="34" cy="98" r="1.5" fill="#fff"/><circle cx="55" cy="104" r="1.5" fill="#fff"/><circle cx="66" cy="94" r="1.2" fill="#fff"/><circle cx="45" cy="90" r="1.2" fill="#fde68a"/>
+<circle cx="50" cy="45" r="24" fill="#fcd5b5"/>
+<path d="M24 50 Q20 16 50 16 Q80 16 76 50 Q72 32 60 28 Q56 36 44 34 Q34 32 30 40 Q26 44 24 50Z" fill="url(#h${u})"/>
+<ellipse cx="41" cy="46" rx="3.6" ry="4.4" fill="#4c1d95"/><ellipse cx="59" cy="46" rx="3.6" ry="4.4" fill="#4c1d95"/><circle cx="42.3" cy="44.4" r="1.4" fill="#fff"/><circle cx="60.3" cy="44.4" r="1.4" fill="#fff"/>
+<path d="M36 42 l-3 -3 M37.5 41 l-1.5 -4 M64 42 l3 -3 M62.5 41 l1.5 -4" stroke="#1e1b4b" stroke-width="1.4" stroke-linecap="round"/>
+${cheeks(.6)}<path d="M44 56 Q50 62 56 56" stroke="#be185d" stroke-width="2.5" fill="#fda4af" stroke-linecap="round"/>
+<path d="M32 26 Q50 12 68 26" stroke="#fde047" stroke-width="3" fill="none"/><polygon points="50,6 53,13 60,13 54.5,17.5 57,24 50,20 43,24 45.5,17.5 40,13 47,13" fill="#fde047" stroke="#f59e0b" stroke-width="1"/>
+<circle cx="27" cy="58" r="2.2" fill="#fde047"/><circle cx="73" cy="58" r="2.2" fill="#fde047"/>
+<line x1="80" y1="88" x2="92" y2="62" stroke="#fde68a" stroke-width="3.5" stroke-linecap="round"/><polygon points="92,52 94.5,58 101,58 96,62 98,68 92,64.5 86,68 88,62 83,58 89.5,58" fill="#fde047"/>
+<path d="M10 30 l2 -5 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2z M84 20 l1.5 -4 l1.5 4 l4 1.5 l-4 1.5 l-1.5 4 l-1.5 -4 l-4 -1.5z" fill="#fef08a"/>`}
+else if(c==='ciara'){body=`<rect x="30" y="70" width="40" height="40" rx="12" fill="#22c55e"/><path d="M25 48 Q25 18 50 18 Q75 18 75 48 L80 72 L70 56 L30 56 L20 72Z" fill="#92400e"/>
+<circle cx="50" cy="46" r="24" fill="#d9a074"/>
+<ellipse cx="40" cy="46" rx="7.5" ry="8.5" fill="#fff"/><ellipse cx="60" cy="46" rx="7.5" ry="8.5" fill="#fff"/>
+<circle cx="40.5" cy="47" r="5.6" fill="#065f46"/><circle cx="59.5" cy="47" r="5.6" fill="#065f46"/><circle cx="40.5" cy="47.5" r="3" fill="#0f172a"/><circle cx="59.5" cy="47.5" r="3" fill="#0f172a"/>
+<circle cx="42.6" cy="44.4" r="2.2" fill="#fff"/><circle cx="61.6" cy="44.4" r="2.2" fill="#fff"/><circle cx="38.6" cy="49.6" r="1" fill="#fff"/><circle cx="57.6" cy="49.6" r="1" fill="#fff"/>
+<path d="M32.5 38 Q40 34 47.5 38 M52.5 38 Q60 34 67.5 38" stroke="#451a03" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+<path d="M31 42 l-3 -2 M69 42 l3 -2" stroke="#0f172a" stroke-width="1.4" stroke-linecap="round"/>${cheeks(.4)}<path d="M45 59 Q50 63 55 59" stroke="#7f1d1d" stroke-width="2.3" fill="none" stroke-linecap="round"/>
+<ellipse cx="50" cy="24" rx="34" ry="6" fill="#a16207"/><path d="M32 24 Q34 4 50 4 Q66 4 68 24Z" fill="#ca8a04"/><rect x="32" y="18" width="36" height="5" fill="#15803d"/>
+<rect x="12" y="80" width="14" height="18" rx="3" fill="#78350f"/><circle cx="19" cy="89" r="4" fill="#fde047"/>`}
+else if(c==='jeremy'){body=`<path d="M28 74 Q50 66 72 74 L74 112 L26 112Z" fill="#2563eb"/><path d="M44 72 L50 82 L56 72" stroke="#fff" stroke-width="2" fill="none"/><rect x="34" y="92" width="32" height="8" rx="3" fill="#1d4ed8"/>
+<circle cx="50" cy="46" r="24" fill="#c68642"/><path d="M27 42 Q27 28 36 24 L36 34Z M73 42 Q73 28 64 24 L64 34Z" fill="#1c1917"/>
+<polygon points="40,28 38,8 45,20 47,2 51,18 55,3 56,19 62,9 60,28" fill="#ef4444" stroke="#991b1b" stroke-width="1"/>
+${eyes}<path d="M36 39 L45 37 M55 37 L64 39" stroke="#1c1917" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M40 55 Q50 66 60 55Z" fill="#fff" stroke="#7f1d1d" stroke-width="2"/>${cheeks(.25)}
+<circle cx="25" cy="48" r="2" fill="#e5e7eb"/><rect x="74" y="80" width="20" height="5" rx="2" fill="#f97316" transform="rotate(-20 84 82)"/>`}
+else{body=`<path d="M26 50 Q24 18 50 18 Q76 18 74 50 L76 74 L24 74Z" fill="#3f2a1d"/><path d="M30 72 Q50 66 70 72 L72 112 L28 112Z" fill="#7c3aed"/><path d="M44 70 L50 80 L56 70Z" fill="#fff"/>
+<circle cx="50" cy="46" r="24" fill="#f1c7a5"/><path d="M27 38 Q36 22 50 26 Q66 22 73 38 Q62 30 50 32 Q38 30 27 38Z" fill="#3f2a1d"/><path d="M30 28 Q50 16 70 28" stroke="#22d3ee" stroke-width="3.5" fill="none"/>
+${eyes}<circle cx="41" cy="45" r="7" fill="none" stroke="#1e293b" stroke-width="1.8"/><circle cx="59" cy="45" r="7" fill="none" stroke="#1e293b" stroke-width="1.8"/><line x1="48" y1="45" x2="52" y2="45" stroke="#1e293b" stroke-width="1.8"/>
+${cheeks(.45)}${mouth()}
+<g transform="rotate(-12 78 92)"><rect x="66" y="80" width="24" height="30" rx="2" fill="#dc2626"/><rect x="69" y="82" width="18" height="26" fill="#fef3c7"/><rect x="66" y="80" width="5" height="30" fill="#991b1b"/><line x1="73" y1="90" x2="85" y2="90" stroke="#a16207" stroke-width="1.5"/><line x1="73" y1="95" x2="83" y2="95" stroke="#a16207" stroke-width="1.5"/></g>
+<path d="M66 76 Q76 84 70 96" stroke="#7c3aed" stroke-width="8" fill="none" stroke-linecap="round"/><circle cx="70" cy="96" r="4" fill="#f1c7a5"/>`}
+return `<svg width="${s}" height="${s*1.2}" viewBox="0 0 105 120" role="img" aria-label="${N}">${body}</svg>`}
+const NAME={arya:'Arya',ciara:'Ciara',jeremy:'Jeremy',natalie:'Natalie'};
+const LINES={arya:{intro:["Woohoo! Let's sparkle through some fractions!","Ready, star-friend? Fractions are just pizza in disguise! 🍕","Ooh, a new level! I can feel the magic!"],
+hint:["Psst! Sparkle tip:","My wand whispers:","Ooh, ooh, try this:"],ok:["YES! Superstar! ⭐","Sparkle-tastic!","Woohoo, nailed it!","You're on fire! 🔥","Magic!"],
+no:["Oopsie! That's okay — magic takes practice!","So close! Shake it off and zap again!","Mistakes are how wizards learn!"],win:["We did it!! Dance party! 💃","That was MAGICAL!"],enc:["Let's zap it again — I believe in you!"]},
+ciara:{intro:["Alright, explorer. One step at a time.","Deep breath. Compass ready — let's go.","New terrain ahead. I trust you."],
+hint:["Trail note:","Here's what I'd check:","Map clue:"],ok:["Exactly right. Nice work.","Solid. Onward!","That's the path.","Perfectly charted."],
+no:["Not quite — every explorer takes a wrong turn.","Let's re-check the map. You've got this.","Steady. Think it through again."],win:["Summit reached! Victory jig time.","Expedition complete. Proud of you."],enc:["Regroup and try that trail again. You're close."]}};
+// (more characters)
+Object.assign(LINES,{jeremy:{intro:["Yo! Let's shred these fractions! 🛹","Mohawk up, brain on. Let's GO!","Heck yeah, new level — I call dibs on the hard ones!"],
+hint:["Pro move:","Here's the trick, dude:","Lemme drop a tip:"],ok:["RADICAL! 🤘","Boom! Nailed it!","Sick move!","That's how it's done!"],
+no:["Wipeout! Every skater falls — hop back on!","Nah, close though! Run it back!","Oof, bail! Shake it off, champ."],win:["Victory dance, let's goooo! 🕺","Total legend move!"],enc:["Run it back, you've got this!"]},
+natalie:{intro:["Hello! Fun fact: 'fraction' comes from the Latin word for 'broken'.","Let's read this puzzle carefully together. 📖","Ooh, a new chapter! I love new chapters."],
+hint:["According to my book:","Let me look that up...","Page 42 says:"],ok:["Brilliant! Textbook perfect!","Correct! Gold star for you.","Exactly as the book says!","Wonderful reasoning!"],
+no:["Hmm, let's reread that. Even great authors revise!","Not quite — every chapter has a twist.","Mistakes are just first drafts!"],win:["What a happy ending! 📚","A story worth retelling!"],enc:["Let's revise and try again!"]},
+});
+// ===== Sound =====
+let AC,muted=localStorage.fqMute==='1';
+function tone(f,d=.12,t='sine',v=.15,delay=0){if(muted)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),s=AC.currentTime+delay;o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.connect(g).connect(AC.destination);o.start(s);o.stop(s+d)}catch(e){}}
+const SFX={pick:()=>tone(520,.06,'triangle'),drop:()=>tone(330,.08,'triangle'),ok:()=>[660,880,1100].forEach((f,i)=>tone(f,.15,'sine',.15,i*.08)),no:()=>tone(160,.25,'sawtooth',.08),
+pow:()=>[400,800].forEach((f,i)=>tone(f,.1,'square',.06,i*.06)),win:()=>[523,659,784,1047,784,1047].forEach((f,i)=>tone(f,.2,'triangle',.15,i*.13))};
+function toggleMute(){muted=!muted;localStorage.fqMute=muted?'1':'0';mute.textContent=muted?'🔇':'🔊'}mute.textContent=muted?'🔇':'🔊';
+// ===== Math helpers =====
+const R=a=>a[Math.floor(Math.random()*a.length)],ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),gcd=(a,b)=>b?gcd(b,a%b):Math.abs(a),shuffle=a=>a.sort(()=>Math.random()-.5);
+const F=(n,d)=>`<span class="frac"><span>${n}</span><span>${d}</span></span>`,simp=(n,d)=>{const g=gcd(n,d);return[n/g,d/g]};
+const B=i=>`<span class="blank" data-i="${i}"></span>`,FB=(a,b)=>F(B(a),B(b));const eqv=(a,b,c,d)=>+a*+d===+b*+c&&+b>0&&+d>0;
+function pie(n,d,size=110,col='#fbbf24'){let p='';if(d===1)return `<svg width="${size}" height="${size}" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="${n?col:'#ffffff33'}" stroke="#fff" stroke-width="2"/></svg>`;
+for(let i=0;i<d;i++){const a0=i/d*2*Math.PI-Math.PI/2,a1=(i+1)/d*2*Math.PI-Math.PI/2;p+=`<path d="M50 50 L${50+45*Math.cos(a0)} ${50+45*Math.sin(a0)} A45 45 0 0 1 ${50+45*Math.cos(a1)} ${50+45*Math.sin(a1)}Z" fill="${i<n?col:'#ffffff33'}" stroke="#fff" stroke-width="2"/>`}
+return `<svg width="${size}" height="${size}" viewBox="0 0 100 100">${p}</svg>`}
+function pies(n,d,size=80){let h='',left=n;do{h+=pie(Math.min(left,d),d,size);left-=d}while(left>0);return h}
+function grid(a,b,c,d){let r='';const W=180/d,H=120/b;for(let i=0;i<b;i++)for(let j=0;j<d;j++){const inA=i<a,inC=j<c;r+=`<rect x="${j*W}" y="${i*H}" width="${W}" height="${H}" fill="${inA&&inC?'#f472b6':inA?'#fbbf2488':inC?'#38bdf888':'#ffffff22'}" stroke="#fff"/>`}return `<svg width="180" height="120">${r}</svg>`}
+function bars(a,b,c,d){const L=c/d*300,parts=a/b*300;let s=`<rect x="0" y="0" width="${parts}" height="26" fill="#fbbf24"/>`;for(let x=0;x<parts-0.1;x+=L)s+=`<rect x="${x}" y="32" width="${Math.min(L,parts-x)}" height="26" fill="#38bdf8" stroke="#fff" stroke-width="2"/>`;return `<svg width="310" height="62"><rect x="0" y="0" width="300" height="26" fill="#ffffff22"/>${s}</svg>`}
+function hundred(p){let r='';for(let i=0;i<100;i++)r+=`<rect x="${i%10*12}" y="${Math.floor(i/10)*12}" width="11" height="11" fill="${i<p?'#4ade80':'#ffffff22'}"/>`;return `<svg width="120" height="120">${r}</svg>`}
+const distract=(sol,lo,hi,k=3)=>{const s=[];let g=0;while(s.length<k&&g++<50){const x=ri(lo,hi);if(!sol.includes(x)&&!s.includes(x))s.push(x)}return s};
+// ===== Worlds: each gen(l) returns {prompt,viz,eq,tiles,sol,check,hint} ; l = 0..5 =====
+const W=[
+{name:"Concept Canyon",icon:"🍕",gen(l){
+ if(l<2){const d=ri(2,4+l*2),n=ri(1,d-1);return{type:'pie',n,d,prompt:`Build ${F(n,d)} of a pizza: drag slices onto the plate!`,eq:`<span class="blank" data-i="pie" style="width:auto;min-width:140px;height:auto;padding:6px">${pie(0,d)}</span>`,
+  tiles:Array(d).fill('🍕'),hint:`The bottom number (${d}) says how many equal slices make the whole pizza. The top (${n}) says how many slices you need.`}}
+ if(l<4){const d=ri(2,6+l),n=ri(1,d-1);return{prompt:"What fraction of the pizza is shaded?",viz:pie(n,d,130),eq:FB(0,1),tiles:shuffle([n,d,...distract([n,d],1,10)]),sol:[n,d],check:v=>v[0]==n&&v[1]==d,hint:"Top: count the shaded slices. Bottom: count ALL the slices."}}
+ const d=ri(2,5),n=ri(1,d-1),k=ri(2,l===5?5:3);return{prompt:"Make an equal (equivalent) fraction!",viz:pie(n,d,100)+' = '+pie(n*k,d*k,100),eq:`${F(n,d)} = ${F(B(0),d*k)}`,tiles:shuffle([n*k,...distract([n*k],1,d*k)]),sol:[n*k],check:v=>v[0]==n*k,hint:`The bottom was multiplied by ${k}. Do the same to the top!`}}},
+{name:"Mixed-Up Mountains",icon:"⛰️",gen(l){const d=ri(2,3+l),w=ri(1,2+Math.floor(l/2)),n=ri(1,d-1),im=w*d+n;
+ if(l%2===0)return{prompt:"Turn the improper fraction into a mixed number. Count the whole pizzas!",viz:pies(im,d),eq:`${F(im,d)} = ${B(0)}${F(B(1),d)}`,tiles:shuffle([w,n,...distract([w,n],1,9)]),sol:[w,n],check:v=>v[0]==w&&v[1]==n,hint:`How many full groups of ${d} fit in ${im}? That's the whole number. The leftover slices go on top.`};
+ return{prompt:"Turn the mixed number into an improper fraction.",viz:pies(im,d),eq:`${w}${F(n,d)} = ${F(B(0),d)}`,tiles:shuffle([im,...distract([im],2,im+d+3)].concat(w+n)),sol:[im],check:v=>v[0]==im,hint:`Whole × bottom + top: ${w} × ${d} + ${n}.`}}},
+{name:"Multiply Meadow",icon:"✖️",gen(l){const b=ri(2,3+l),a=ri(1,b-1),d=ri(2,3+l),c=ri(1,d-1),N=a*c,D=b*d;
+ return{prompt:"Multiply! The pink overlap in the grid is the answer.",viz:grid(a,b,c,d),eq:`${F(a,b)} × ${F(c,d)} = ${FB(0,1)}`,tiles:shuffle([N,D,...distract([N,D],1,D+4,4)]),sol:[N,D],check:v=>eqv(v[0],v[1],N,D),hint:"Top × top goes on top. Bottom × bottom goes on the bottom."}}},
+{name:"Divide Desert",icon:"➗",gen(l){
+ if(l<2){let c=ri(1,3),d=ri(c+1,6),a,b;const q=ri(1,4);b=d;a=c*q;if(a>=b*3){a=c;}return{prompt:`How many ${F(c,d)} pieces fit in ${F(a,b)}? Keep, Change, Flip!`,viz:bars(a,b,c,d),eq:`${F(a,b)} ÷ ${F(c,d)} = ${F(a,b)} × ${FB(0,1)}`,tiles:shuffle([d,c,...distract([c,d],1,9)]),sol:[d,c],check:v=>v[0]==d&&v[1]==c,hint:"Keep the first fraction, change ÷ to ×, and FLIP the second one upside down."}}
+ const b=ri(2,3+l),a=ri(1,b+1),d=ri(2,3+l),c=ri(1,d-1),N=a*d,D=b*c;
+ return{prompt:"Divide! (Keep, Change, Flip — then multiply.)",viz:bars(Math.min(a,b),b,c,d),eq:`${F(a,b)} ÷ ${F(c,d)} = ${FB(0,1)}`,tiles:shuffle([N,D,...distract([N,D],1,Math.max(N,D)+5,4)]),sol:[N,D],check:v=>eqv(v[0],v[1],N,D),hint:`Flip ${F(c,d)} to ${F(d,c)}, then multiply: top × top, bottom × bottom.`}}},
+{name:"Decimal Docks",icon:"💯",gen(l){const P=[[1,2],[1,4],[3,4],[1,5],[2,5],[3,5],[4,5],[1,10],[3,10],[7,10],[9,10],[1,20],[3,20],[1,25],[7,25]];const[n,d]=R(P.slice(0,7+l*2)),pc=Math.round(n/d*100),dec=String(n/d);
+ if(l%3===0)return{prompt:"Turn the fraction into a percent (out of 100).",viz:hundred(pc),eq:`${F(n,d)} = ${F(B(0),100)} = ${B(1)}%`,tiles:shuffle([pc,pc,...distract([pc],1,99,3)]),sol:[pc,pc],check:v=>v[0]==pc&&v[1]==pc,hint:`What do you multiply ${d} by to get 100? Do the same to ${n}.`};
+ if(l%3===1){const wr=[`${n}.${d}`,String(+(d/n).toFixed(2)),String(pc),'0.0'+pc%10+1].filter(x=>x!==dec);return{prompt:"Which decimal equals this fraction?",viz:hundred(pc),eq:`${F(n,d)} = ${B(0)}`,tiles:shuffle([dec,...[...new Set(wr)].slice(0,3)]),sol:[dec],check:v=>v[0]==dec,hint:`Divide ${n} ÷ ${d}. Or: ${pc} out of 100 = 0.${String(pc).padStart(2,'0')}.`}}
+ const[sn,sd]=simp(pc,100);return{prompt:"Turn the percent into a simplest fraction.",viz:hundred(pc),eq:`${pc}% = ${F(pc,100)} = ${FB(0,1)}`,tiles:shuffle([sn,sd,...distract([sn,sd],1,30,4)]),sol:[sn,sd],check:v=>v[0]==sn&&v[1]==sd,hint:`Divide top and bottom of ${F(pc,100)} by ${gcd(pc,100)}.`}}}];
+const LV=6,QN=4,GEMS=["💎","🔷","🟣","🟢","🔶"],STK=["🦄","🐉","🌈","🚀","👑"],GOLD=["🥇","🏅","🎖️","🏆","🌟"];
+// ===== State =====
+let S=Object.assign({char:'arya',stars:{},tok:3},JSON.parse(localStorage.fq2||'{}'));const save=()=>localStorage.fq2=JSON.stringify(S);
+if(S.char==='aria')S.char='arya';else if(S.char==='sierra')S.char='ciara';if(!CHARS.includes(S.char))S.char='arya';save();
+const guideFor=w=>{const o=[S.char,...CHARS.filter(c=>c!==S.char)];return o[w%4]};
+const wStars=w=>[...Array(LV)].reduce((s,_,l)=>s+(S.stars[w+'-'+l]||0),0),wDone=w=>[...Array(LV)].every((_,l)=>S.stars[w+'-'+l]),unlocked=w=>w===0||wDone(w-1);
+const lvOpen=(w,l)=>unlocked(w)&&(l===0||S.stars[w+'-'+(l-1)]);
+function pick(c){S.char=c;save();document.querySelectorAll('.chars .card').forEach(e=>e.classList.toggle('sel',e.dataset.c===c));}
+function go(s){document.querySelectorAll('.scr').forEach(e=>e.classList.remove('on'));document.getElementById('s-'+s).classList.add('on');({map:drawMap,coll:drawColl,title:()=>pick(S.char)}[s]||(()=>{}))();scrollTo(0,0)}
+function drawMap(){const g=S.char;mg.innerHTML=`<div class="bob">${svg(g,60)}</div>`;mb.textContent=`${NAME[g]}: ${R(LINES[g].intro)}`;tok.textContent=S.tok;starTot.textContent=Object.values(S.stars).reduce((a,b)=>a+b,0)+' / '+W.length*LV*3;
+worlds.innerHTML=W.map((w,i)=>`<div class="world ${unlocked(i)?'':'lock'}"><div style="font-size:2em">${w.icon}</div><b>${w.name}</b><br><small>Guide: ${NAME[guideFor(i)]} · ⭐${wStars(i)}/${LV*3}</small><br>${
+[...Array(LV)].map((_,l)=>{const st=S.stars[i+'-'+l]||0;return `<button class="lv" ${lvOpen(i,l)?'':'disabled'} onclick="start(${i},${l})">${st?GEMS[i]:l+1}<small>${'★'.repeat(st)}${'☆'.repeat(3-st)}</small></button>`}).join('')}</div>`).join('')}
+function drawColl(){gems.innerHTML=W.flatMap((w,i)=>[...Array(LV)].map((_,l)=>`<div class="slot ${S.stars[i+'-'+l]?'':'no'}">${GEMS[i]}<small>${w.icon} ${l+1}</small></div>`)).join('');
+stk.innerHTML=W.map((w,i)=>`<div class="slot ${wDone(i)?'':'no'}">${STK[i]}<small>${w.name}</small></div>`).join('')+W.map((w,i)=>`<div class="slot ${wStars(i)===LV*3?'':'no'}">${GOLD[i]}<small>Perfect ${w.icon}</small></div>`).join('')}
+// ===== Play =====
+let G;
+function say(t){pb.innerHTML=t;pg.innerHTML=`<div class="bob">${svg(G.g,60)}</div>`}
+function start(w,l){G={w,l,i:0,mist:0,helps:0,g:guideFor(w)};go('play');lvname.textContent=`${W[w].icon} ${W[w].name} ${l+1}`;say(`${R(LINES[G.g].intro)} Welcome to <b>${W[w].name}</b>, level ${l+1}!`);next()}
+function next(){if(G.i>=QN)return finish();const P=G.P=W[G.w].gen(G.l);G.hist=[];G.sel=null;G.pieCount=0;prog.style.width=G.i/QN*100+'%';
+ promptEl.innerHTML=P.prompt;viz.innerHTML=P.viz||'';eq.innerHTML=P.eq;
+ // DragonBox-style fading: pictures fade out, notation fades in across levels 1..6
+ const f=G.l/(LV-1);viz.style.opacity=(1-.75*f).toFixed(2);eq.style.opacity=(P.type==='pie'?1:.55+.45*f).toFixed(2);
+ tray.innerHTML='';P.tiles.forEach((t,k)=>{const e=document.createElement('div');e.className='tile'+(P.type==='pie'?' slice':'');e.textContent=t;e.dataset.v=t;e.dataset.k=k;bindTile(e);tray.appendChild(e)});
+ eq.querySelectorAll('.blank').forEach(b=>b.onclick=()=>{if(G.sel)place(G.sel,b);else if(b.dataset.k!=null&&P.type!=='pie')unplace(b)});drawPU()}
+function bindTile(e){e.onpointerdown=ev=>{if(e.classList.contains('used'))return;ev.preventDefault();SFX.pick();const sx=ev.clientX,sy=ev.clientY;let ghost=null;
+ const mv=m=>{if(!ghost&&Math.hypot(m.clientX-sx,m.clientY-sy)>8){ghost=e.cloneNode(true);ghost.classList.add('drag');document.body.appendChild(ghost)}
+  if(ghost){ghost.style.left=m.clientX-28+'px';ghost.style.top=m.clientY-26+'px';eq.querySelectorAll('.blank').forEach(b=>b.classList.toggle('hot',hit(b,m)))}};
+ const up=u=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);eq.querySelectorAll('.blank').forEach(b=>b.classList.remove('hot'));
+  if(ghost){ghost.remove();const b=[...eq.querySelectorAll('.blank')].find(b=>hit(b,u));if(b)place(e,b)}else{document.querySelectorAll('.tile.sel').forEach(x=>x.classList.remove('sel'));G.sel=e;e.classList.add('sel')}};
+ addEventListener('pointermove',mv);addEventListener('pointerup',up)}}
+const hit=(b,m)=>{const r=b.getBoundingClientRect();return m.clientX>=r.left&&m.clientX<=r.right&&m.clientY>=r.top&&m.clientY<=r.bottom};
+function place(t,b){t.classList.remove('sel');G.sel=null;SFX.drop();
+ if(G.P.type==='pie'){if(G.pieCount>=G.P.d)return;G.pieCount++;t.classList.add('used');G.hist.push({t,b});b.innerHTML=pie(G.pieCount,G.P.d);b.classList.add('filled');return}
+ if(b.dataset.k!=null)unplace(b,true);b.textContent=t.dataset.v;b.dataset.k=t.dataset.k;b.classList.add('filled');t.classList.add('used');G.hist.push({t,b})}
+function unplace(b,silent){const t=tray.querySelector(`[data-k="${b.dataset.k}"]`);if(t)t.classList.remove('used');delete b.dataset.k;b.textContent='';b.classList.remove('filled');G.hist=G.hist.filter(h=>h.b!==b)}
+function check(){const P=G.P;let ok;
+ if(P.type==='pie')ok=G.pieCount===P.n;
+ else{const bl=[...eq.querySelectorAll('.blank')];if(bl.some(b=>b.dataset.k==null)){say(G.g==='arya'?'Fill ALL the boxes first, silly! ✨':'Every box needs a tile before we check.');return}ok=P.check(bl.map(b=>b.textContent))}
+ if(ok){SFX.ok();toast(R(['✨','🎉','⭐','💥']));confetti(40);say(R(LINES[G.g].ok));G.i++;checkBtn.disabled=true;setTimeout(()=>{checkBtn.disabled=false;next()},900)}
+ else{SFX.no();G.mist++;eq.classList.add('shake');setTimeout(()=>eq.classList.remove('shake'),400);say(`${R(LINES[G.g].no)} <small>(Try ${G.g==='arya'?'my 💡':'a 💡 hint'} or ↩ Undo.)</small>`)}}
+// ===== Power-ups =====
+function drawPU(){pu.innerHTML=`<span>🪙${S.tok}</span><button onclick="pHint()">💡 Hint${G.hintFree?'':' (1🪙)'}</button><button onclick="pReveal()" ${S.tok<1?'disabled':''}>🧩 Reveal piece (1🪙)</button><button onclick="pUndo()">↩ Undo (free)</button><button onclick="pClear()" class="ghost">Clear</button>`}
+function spend(){if(S.tok<1){say(G.g==='arya'?"Out of tokens! Earn more by finishing levels ✨":"No tokens left — finishing levels earns more.");return false}S.tok--;save();SFX.pow();return true}
+function pHint(){if(G.P.hinted||spend()){if(!G.P.hinted)G.helps++;G.P.hinted=true;say(`${R(LINES[G.g].hint)} ${G.P.hint}`);
+ if(G.P.sol){const bl=[...eq.querySelectorAll('.blank')],i=bl.findIndex(b=>b.dataset.k==null);if(i>=0){const t=[...tray.children].find(t=>!t.classList.contains('used')&&t.dataset.v==String(G.P.sol[i]));if(t){t.classList.remove('pulse');void t.offsetWidth;t.classList.add('pulse')}}}drawPU()}}
+function pReveal(){const P=G.P;if(P.type==='pie'){if(G.pieCount>=P.n){say("You already have enough slices — maybe too many? Try Undo.");return}if(!spend())return;G.helps++;place([...tray.children].find(t=>!t.classList.contains('used')),eq.querySelector('.blank'))}
+ else{const bl=[...eq.querySelectorAll('.blank')];const i=bl.findIndex(b=>b.textContent!=String(P.sol[bl.indexOf(b)]));if(i<0){say("Everything's already right — hit Check!");return}
+ if(!spend())return;G.helps++;if(bl[i].dataset.k!=null)unplace(bl[i]);const t=[...tray.children].find(t=>!t.classList.contains('used')&&t.dataset.v==String(P.sol[i]))||[...tray.children].find(t=>t.dataset.v==String(P.sol[i]));
+ if(t.classList.contains('used')){const ob=bl.find(b=>b.dataset.k===t.dataset.k);unplace(ob)}place(t,bl[i])}
+ say(G.g==='arya'?'Poof! ✨ I zapped one piece into place!':'I placed one piece for you. Take it from here.');drawPU()}
+function pUndo(){const h=G.hist.pop();if(!h){say("Nothing to undo yet!");return}SFX.pick();
+ if(G.P.type==='pie'){h.t.classList.remove('used');G.pieCount--;h.b.innerHTML=pie(G.pieCount,G.P.d)}else unplace(h.b)}
+function pClear(){while(G.hist.length)pUndo()}
+// ===== Finish =====
+function finish(){prog.style.width='100%';const k=G.w+'-'+G.l,stars=G.mist===0&&G.helps===0?3:G.mist+G.helps<=2?2:1,prev=S.stars[k]||0,firstGem=!prev,wasDone=wDone(G.w);
+ S.stars[k]=Math.max(prev,stars);const earn=1+(stars===3);S.tok+=earn;save();const worldNow=!wasDone&&wDone(G.w),perfect=wStars(G.w)===LV*3;
+ go('win');SFX.win();wstars.innerHTML=[0,1,2].map(i=>`<span>${i<stars?'⭐':'☆'}</span>`).join('');
+ wt.textContent=worldNow?`🏆 ${W[G.w].name} Conquered!`:'🎉 Level Complete!';
+ dancers.innerHTML=(worldNow?CHARS:[G.g]).map(c=>`<div class="dance">${svg(c,worldNow?100:130)}</div>`).join('');
+ wmsg.innerHTML=`${firstGem?`New gem: ${GEMS[G.w]}! `:''}${worldNow?`Sticker unlocked: ${STK[G.w]}! `:''}${perfect&&stars===3?`Perfect-world medal ${GOLD[G.w]}! `:''}+${earn}🪙<br><i>“${R(LINES[G.g].win)}” — ${NAME[G.g]}</i>${worldNow&&G.w<W.length-1?`<br>“Next stop: ${W[G.w+1].name}! I'll lead this one!” — ${NAME[guideFor(G.w+1)]}`:''}${worldNow&&G.w===W.length-1?'<br>🎓 You are a FRACTION MASTER!':''}`;
+ confetti(worldNow?450:180);if(worldNow)setTimeout(()=>confetti(300),1200);
+ retryBtn.onclick=()=>start(G.w,G.l);const nw=G.l+1<LV?[G.w,G.l+1]:G.w+1<W.length?[G.w+1,0]:null;nextBtn.style.display=nw?'':'none';if(nw)nextBtn.onclick=()=>start(...nw)}
+// ===== FX =====
+function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),1000)}
+const cv=conf,cx=cv.getContext('2d');let PS=[],running=false;
+function confetti(n){cv.width=innerWidth;cv.height=innerHeight;for(let i=0;i<n;i++)PS.push({x:Math.random()*cv.width,y:-20-Math.random()*300,vx:Math.random()*4-2,vy:2+Math.random()*4,r:Math.random()*6,c:`hsl(${Math.random()*360},90%,60%)`,a:Math.random()*6});if(!running){running=true;requestAnimationFrame(loop)}}
+function loop(){cx.clearRect(0,0,cv.width,cv.height);PS=PS.filter(p=>p.y<cv.height+20);PS.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.a+=.1;cx.fillStyle=p.c;cx.save();cx.translate(p.x,p.y);cx.rotate(p.a);cx.fillRect(-4,-2,8+p.r,4);cx.restore()});if(PS.length)requestAnimationFrame(loop);else running=false}
+ta.innerHTML=`<div class="bob">${svg('arya')}</div>`;ts.innerHTML=`<div class="bob">${svg('ciara')}</div>`;tj.innerHTML=`<div class="bob">${svg('jeremy')}</div>`;tn.innerHTML=`<div class="bob">${svg('natalie')}</div>`;pick(S.char);
+</script>
+<script>window.CIJE_HELP_CONTEXT=()=>{const on=document.querySelector('.scr.on'),scr=on?on.id.replace('s-',''):'';let level='Screen: '+scr;
+try{if(scr==='play'&&G)level=`World ${G.w+1} (${W[G.w].name}), Level ${G.l+1}, puzzle ${Math.min(G.i+1,QN)}/${QN} — guide ${NAME[G.g]}`;else if(scr==='win'&&G)level=`Just finished World ${G.w+1}, Level ${G.l+1}`;}catch(e){}
+return{game:'Fraction Quest',level}};</script>
+<script src="/students/help.js" defer></script></body></html>
